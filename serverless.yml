@@ -1,0 +1,74 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: apc91
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: aws-lambda-crud-node
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-lambda-crud-node
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: nodejs20.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-east-1:398448454269:table/APC-taskTable
+
+functions:
+  createTask:
+    handler: src/task.addTask
+    description: create tasks
+    events:
+      - httpApi:
+          path: /task
+          method: post
+
+  getTasks:
+    handler: src/task.getTasks
+    description: get tasks
+    events:
+      - httpApi:
+          path: /tasks
+          method: get
+
+  getTask:
+    handler: src/task.getTask
+    description: get task
+    events:
+      - httpApi:
+          path: /task/{id}
+          method: get
+
+  updateTask:
+    handler: src/task.updateTask
+    description: update task
+    events:
+      - httpApi:
+          path: /task/{id}
+          method: put
+
+  deleteTask:
+    handler: src/task.deleteTask
+    description: delete 
+    events:
+      - httpApi:
+          path: /task/{id}
+          method: delete
+          
+
+resources: # CloudFormation template syntax
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: APC-taskTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id  # nombre del campo
+            AttributeType: S   # tipo string
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
